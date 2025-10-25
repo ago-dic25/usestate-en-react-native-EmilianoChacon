@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { estiloTextos } from './misEstilos';
 
@@ -42,6 +42,28 @@ export default function App() {
 
   const incrementarContador = () => {
     setContador(contador + 1);
+  };
+
+  const handleDeleteConfirmation = (nombreParaBorrar) => {
+    Alert.alert(
+      'Eliminar Nombre',
+      `¿Estás seguro de que quieres eliminar a "${nombreParaBorrar}"?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          onPress: () => {
+            setListaNombres(prevNombres => prevNombres.filter(nombre => nombre !== nombreParaBorrar));
+            setMensaje(`'${nombreParaBorrar}' fue eliminado de la lista.`);
+          },
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const emoji =
@@ -95,7 +117,11 @@ export default function App() {
       <FlatList
         style={styles.lista}
         data={listaNombres}
-        renderItem={({item}) => <Text style={styles.listaItem}>{item}</Text>}
+        renderItem={({item}) => (
+          <TouchableOpacity onPress={() => handleDeleteConfirmation(item)}>
+            <Text style={styles.listaItem}>{item}</Text>
+          </TouchableOpacity>
+        )}
         keyExtractor={(item, index) => index.toString()}
         ListHeaderComponent={() => (
           listaNombres.length > 0 && <Text style={styles.listaTitulo}>Nombres agregados:</Text>
@@ -114,7 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    paddingTop: 50,
+    paddingTop: 50, // Add padding top to avoid overlap with status bar
   },
   input: {
     backgroundColor: '#ffffff',
@@ -169,7 +195,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 15,
     textAlign: 'center',
-    height: 40,
+    height: 40, // Give it a fixed height to avoid layout jumps
   },
   contador: {
     color: '#7A7A7A',
