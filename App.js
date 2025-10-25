@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import React, { useState } from 'react';
 import { estiloTextos } from './misEstilos';
 
@@ -8,6 +8,7 @@ export default function App() {
   const [nombre, setNombre] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [contador, setContador] = useState(0);
+  const [listaNombres, setListaNombres] = useState([]);
 
   const mostrarMensaje = () => {
     if (nombre.trim() === '') {
@@ -17,10 +18,26 @@ export default function App() {
     }
   };
 
+  const agregarNombre = () => {
+    const nombreTrimmed = nombre.trim();
+    if (nombreTrimmed === '') {
+      setMensaje('Escribe un nombre para poder agregarlo.');
+      return;
+    }
+    if (listaNombres.includes(nombreTrimmed)) {
+      setMensaje(`'${nombreTrimmed}' ya existe en la lista.`);
+      return;
+    }
+    setListaNombres([...listaNombres, nombreTrimmed]);
+    setNombre('');
+    setMensaje(`'${nombreTrimmed}' fue agregado a la lista.`);
+  };
+
   const limpiarCampos = () => {
     setNombre('');
     setMensaje('');
     setContador(0);
+    setListaNombres([]);
   };
 
   const incrementarContador = () => {
@@ -53,7 +70,11 @@ export default function App() {
 
       <View style={styles.botones}>
         <TouchableOpacity style={styles.btnPrimario} onPress={mostrarMensaje}>
-          <Text style={styles.btnTexto}>Mostrar mensaje</Text>
+          <Text style={styles.btnTexto}>Mostrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.btnCuaternario} onPress={agregarNombre}>
+          <Text style={styles.btnTexto}>Agregar</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.btnSecundario} onPress={limpiarCampos}>
@@ -71,6 +92,16 @@ export default function App() {
         <Text style={styles.contadorTexto}>{contador}</Text>
       </View>
 
+      <FlatList
+        style={styles.lista}
+        data={listaNombres}
+        renderItem={({item}) => <Text style={styles.listaItem}>{item}</Text>}
+        keyExtractor={(item, index) => index.toString()}
+        ListHeaderComponent={() => (
+          listaNombres.length > 0 && <Text style={styles.listaTitulo}>Nombres agregados:</Text>
+        )}
+      />
+
       <StatusBar style="auto" />
     </View>
   );
@@ -83,10 +114,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    paddingTop: 50,
   },
   input: {
     backgroundColor: '#ffffff',
-    width: '80%',
+    width: '90%',
     padding: 12,
     borderRadius: 12,
     marginTop: 10,
@@ -121,6 +153,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 10,
   },
+  btnCuaternario: {
+    backgroundColor: '#D8BFD8',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+  },
   btnTexto: {
     color: '#333',
     fontSize: 16,
@@ -131,6 +169,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 15,
     textAlign: 'center',
+    height: 40,
   },
   contador: {
     color: '#7A7A7A',
@@ -148,5 +187,22 @@ const styles = StyleSheet.create({
   contadorTexto: {
     color: '#333',
     fontSize: 16,
+  },
+  lista: {
+    width: '90%',
+    marginTop: 10,
+  },
+  listaTitulo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  listaItem: {
+    fontSize: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    color: '#555',
   }
 });
